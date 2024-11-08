@@ -1,0 +1,2 @@
+dibuat di local C
+lakukan (npm init --y) di terminal
