@@ -1,4 +1,4 @@
-// method http.createServer(), Sesuai namanya, method ini berfungsi untuk membuat HTTP server yang merupakan instance dari http.server
+// Body Request
 const http = require("http");
 
 /**
@@ -18,15 +18,19 @@ const requestListener = (request, response) => {
   }
 
   if (method === "POST") {
-    response.end("<h1>Hai!</h1>");
-  }
-
-  if (method === "PUT") {
-    response.end("<h1>Bonjour!</h1>");
-  }
-
-  if (method === "DELETE") {
-    response.end("<h1>Salam!</h1>");
+    // variabel body dan inisialisasikan nilainya dengan array kosong. Ini berfungsi untuk menampung buffer pada stream.
+    let body = [];
+    // event data terjadi pada request, kita isi array body dengan chunk (potongan data) yang dibawa callback function pada event tersebut.
+    request.on("data", (chunk) => {
+      body.push(chunk);
+    });
+    // ketika proses stream berakhir, maka event end akan terbangkitkan. Di sinilah kita mengubah variabel body yang sebelumnya menampung buffer
+    // menjadi data sebenarnya dalam bentuk string melalui perintah Buffer.concat(body).toString()
+    request.on("end", () => {
+      body = Buffer.concat(body).toString();
+      const { name } = JSON.parse(body);
+      response.end(`<h1>Hai, ${name}!</h1>`);
+    });
   }
 };
 // Request listener memiliki 2 parameter, yakni request dan response
@@ -40,14 +44,5 @@ const host = "localhost";
 server.listen(port, host, () => {
   console.log(`Server berjalan pada http://${host}:${port}`);
 });
-// jalankan npm run start
-/* curl -X GET http://localhost:5000
-// output: <h1>Hello!</h1>
-curl -X POST http://localhost:5000
-// output: <h1>Hai!</h1>
-curl -X PUT http://localhost:5000
-// output: <h1>Bonjour!</h1>
-curl -X DELETE http://localhost:5000
-// output: <h1>Salam!</h1>s */
-
-// jika tidak bisa gunakan ini tinggal ganti method : Invoke-WebRequest -Uri http://localhost:5000 -Method GET
+// Gunakan Git bash
+// curl -X POST -H "Content-Type: application/json" http://localhost:5000 -d "{\"name\": \"Dimas\"}"
